@@ -5,9 +5,10 @@ import telebot
 import datetime
 from bs4 import BeautifulSoup
 from typing import List, Tuple
+from DB import Groups, Timetable, session
 
 bot = telebot.TeleBot(config.access_token)
-
+AllGroups = ['K3241', 'M3208']
 
 # telebot.apihelper.proxy = {'https': 'https://104.248.53.46:3128'}
 
@@ -20,12 +21,36 @@ def start(message: str):
 
 @bot.message_handler(commands=['add_user'])
 def add_new_student(message: str):
-    print(message.text[10:], message.chat.id)
 
-    bot.send_message(message.chat.id, "Отлично!")
-    # print(message.chat.id)
+    s=session()
+    rows = s.query(Groups).filter(Groups.TelegrammID == message.chat.id).all()
+    
+    if len(rows)>0:
+        
+        bot.send_message(message.chat.id, "Ты уже зарегистрирован как студент группы " + s.query(Groups).get(message.chat.id).GroupID + ". Вы можете отписаться от рассылки этой группы командой /remove_user")
+        return None
+    else:
+        if message.text[10:] in AllGroups: 
+            new_user = Groups(GroupID=message.text[10:], TelegrammID=message.chat.id)
+            s.add(new_user)
+            s.commit()         
+            bot.send_message(message.chat.id, "Отлично! Теперь вы зарегистрированы как студент группы " + message.text[10:])
+        else:
+            bot.send_message(message.chat.id, "Номер группы введен неправильно")
 
 
+@bot.message_handler(commands=['remove_user'])
+def remove_user(message: str):
+
+    s=session()
+
+    usergroup = s.query(Groups).filter(Groups.TelegrammID == message.chat.id).all()
+    
+    s.query(Groups).filter(Groups.TelegrammID == message.chat.id).delete()  
+    
+    bot.send_message(message.chat.id, "Вы отписались от рассылки группы " + usergroup[0].GroupID )
+    s.commit()
+    
 '''
 
 bot.message_handler(commands=['near_lesson'])
