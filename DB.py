@@ -11,9 +11,9 @@ session = sessionmaker(bind=engine)
 class Timetable(Base):
     __tablename__ = 'timetable'
     GroupID = Column(String)
-    Time = Column(DateTime)
+    Time = Column(String)
     Subject = Column(String)
-    ZumLink = Column(String)
+    ZoomLink = Column(String)
 
 
     __table_args__ = (
@@ -26,7 +26,7 @@ class Timetable(Base):
 class Groups(Base):
     __tablename__ = 'Groups'
     GroupID = Column(String)
-    TelegrammID = Column(String, primary_key= True)
+    TelegramID = Column(String, primary_key= True)
 
 
 Base.metadata.create_all(engine)
