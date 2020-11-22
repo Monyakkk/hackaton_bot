@@ -9,7 +9,7 @@ engine = create_engine("sqlite:///Database.db")
 session = sessionmaker(bind=engine)
 
 class Timetable(Base):
-    __tablename__ = 'timetable'
+    __tablename__ = 'Timetable'
     GroupID = Column(String)
     Time = Column(String)
     Subject = Column(String)

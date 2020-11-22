@@ -39,7 +39,7 @@ def add_new_student(message: str):
             s.commit()         
             bot.send_message(message.chat.id, "Отлично! Теперь вы зарегистрированы как студент группы " + message.text[10:] + ". Чтобы получить полный список команд для бота - напишите /help")
         else:
-            bot.send_message(message.chat.id, "Номер группы введен неправильно")
+            bot.send_message(message.chat.id, "Такой группы нет в расписании")
 
 
 @bot.message_handler(commands=['remove_user'])
@@ -74,13 +74,15 @@ def info(message: str):
 
 
 @bot.message_handler(commands=['getTimetable'])
-def info(message: str):
+def getTimetable(message: str):
     s = session()
 
     userGroup = s.query(Groups).filter(Groups.TelegramID == message.chat.id).all()
+    
 
     userTimetable = s.query(Timetable).filter(Timetable.GroupID == userGroup[0].GroupID).all()
-
+    
+    
     ans = ''
     for item in userTimetable:
         dtStringList = re.split(' |,|-|:', item.Time)
@@ -89,8 +91,12 @@ def info(message: str):
         lessonDT = dtList[2]+'.'+dtList[1]+' '+dtList[3]+':'+dtList[4]
         ans += lessonDT +' ' + str(item.Subject) + ' ' + str(item.ZoomLink)
         ans += '\n'
-
-    bot.send_message(message.chat.id, ans)
+    #print(ans)
+    if ans == '':
+        bot.send_message(message.chat.id, "Для вашей группы нет расписания")
+    else:    
+        bot.send_message(message.chat.id, ans)
+    
 if __name__ == '__main__':
     bot.polling()
  
